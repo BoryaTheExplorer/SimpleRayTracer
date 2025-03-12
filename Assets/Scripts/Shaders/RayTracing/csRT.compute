@@ -1,0 +1,23 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+struct CameraData{
+    float3 position;
+};
+
+RWTexture2D<float4> ResultTexture;
+RWStructuredBuffer<CameraData> Camera;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = id.xy / float2(512, 512) - .5;
+
+    CameraData camera = Camera[0];
+
+    float distanceToCamera = distance(camera.position.xyz, float3(uv, 0));
+
+    ResultTexture[id.xy] = float4(distanceToCamera.xxx, 1);
+}
